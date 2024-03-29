@@ -1,6 +1,4 @@
-Sure, here's a basic example of a Python Cloud Function using Google Cloud Functions to check which VM instances have the default service account in use:
 
-```python
 from googleapiclient import discovery
 from google.auth import compute_engine
 
@@ -23,8 +21,3 @@ def list_instances_with_default_service_account(request):
                         instances_with_default_sa.append(instance['name'])
 
     return {'instances_with_default_sa': instances_with_default_sa}
-```
-
-This function takes project_id and zone as parameters, queries the Compute Engine API to list all VM instances in the specified project and zone, and then checks each instance to see if it's using the default service account. Finally, it returns a list of VM instance names that are using the default service account.
-
-Make sure to deploy this Cloud Function and set up the necessary permissions for it to access the Compute Engine API. Also, consider adding error handling and additional validation as needed.
