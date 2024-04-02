@@ -1,24 +1,40 @@
 import requests
+from flask import jsonify
 
-def pull_data_from_prisma(request):
-    # Prisma endpoint URL
-    prisma_url = "YOUR_PRISMA_ENDPOINT_URL"
+def main(request):
+    url = "https://api.prismacloud.io/search/api/v1/config"
 
-    # RQL query to pull data
-    rql_query = "YOUR_RQL_QUERY_HERE"
-
-    # Headers for authentication if required
-    headers = {
-        "Authorization": "Bearer YOUR_AUTH_TOKEN",
-        "Content-Type": "application/json"
+    payload = {
+      "skipSearchCreation": True,
+      "limit": 0,
+      "withResourceJson": True,
+      "timeRange": {
+        "type": "relative",
+        "value": {
+          "unit": "minute",
+          "amount": 0
+        }
+      },
+      "skipResult": True,
+      "sort": [
+        {
+          "field": "ID",
+          "direction": "asc"
+        }
+      ],
+      "query": "string",
+      "nextPageToken": "string"
     }
 
-    # Sending request to Prisma
-    response = requests.post(prisma_url, json={"query": rql_query}, headers=headers)
+    headers = {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Accept': 'application/json; charset=UTF-8',
+      'x-redlock-auth': '<API_KEY_VALUE>'
+    }
 
-    # Checking if request was successful
+    response = requests.post(url, headers=headers, json=payload)
+
     if response.status_code == 200:
-        data = response.json()
-        return {"status": "success", "data": data}
+        return jsonify(response.json())
     else:
-        return {"status": "error", "message": "Failed to retrieve data from Prisma."}
+        return f"Error: {response.status_code} - {response.text}", response.status_code
