@@ -1,27 +1,29 @@
 import requests
+import json
 
-def get_bearer_token(username, password):
-    # Prisma Cloud authentication endpoint
-    auth_endpoint = 'https://app.prismacloud.io/login'
+def generate_bearer_token(access_key, secret_key):
+    try:
+        auth_endpoint = 'https://api.prismacloud.io/login'
+        payload = {
+            'username': access_key,
+            'password': secret_key
+        }
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(auth_endpoint, data=json.dumps(payload), headers=headers)
+        response.raise_for_status()  # Raise an exception for HTTP errors
 
-    # Send authentication request
-    response = requests.post(auth_endpoint, json={"username": username, "password": password})
-    
-    # Check if request was successful
-    if response.status_code == 200:
-        # Parse access token from response
-        access_token = response.json().get('access_token')
-        return access_token
-    else:
-        print(f"Failed to authenticate. Status code: {response.status_code}")
+        return response.json().get('token')
+    except requests.exceptions.RequestException as e:
+        print(f"Error generating bearer token: {e}")
         return None
 
 # Example usage
-username = 'your_username'
-password = 'your_password'
-bearer_token = get_bearer_token(username, password)
+access_key = 'your_access_key'
+secret_key = 'your_secret_key'
+bearer_token = generate_bearer_token(access_key, secret_key)
 
 if bearer_token:
-    print(f"Bearer Token: {bearer_token}")
+    print("Bearer Token:")
+    print(bearer_token)
 else:
-    print("Authentication failed.")
+    print("Failed to generate bearer token.")
