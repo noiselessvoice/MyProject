@@ -1,30 +1,44 @@
 from google.cloud import asset_v1
+from google.protobuf.json_format import MessageToDict
 
-def list_assets_in_folder(folder_id):
-    # Initialize the Asset Service client
+def list_project_assets(project_id):
     client = asset_v1.AssetServiceClient()
 
-    # Construct the full folder name
-    parent = f"folders/{folder_id}"
+    # Project resource format
+    project_resource = f"projects/{project_id}"
 
-    # Create the request
+    # Create a request
     request = asset_v1.ListAssetsRequest(
-        parent=parent,
+        parent=project_resource,
         asset_types=[],
         content_type=asset_v1.ContentType.RESOURCE,
     )
 
-    # Fetch and print the asset inventory
+    # List assets
     response = client.list_assets(request=request)
-    
-    # Print the results
+
+    assets = []
     for asset in response:
-        print(f"Asset name: {asset.name}")
-        print(f"Asset type: {asset.asset_type}")
-        print(f"Resource: {asset.resource.data}")
-        print("\n")
+        # Convert the resource data to a dictionary
+        resource_data = MessageToDict(asset.resource.data)
+
+        asset_details = {
+            'name': asset.name,
+            'asset_type': asset.asset_type,
+            'created': resource_data.get('createTime'),
+            'status': resource_data.get('state', 'Unknown')  # Example for status, adjust based on your resource schema
+        }
+        assets.append(asset_details)
+    
+    return assets
 
 if __name__ == "__main__":
-    # Replace 'your-folder-id' with your actual folder ID
-    folder_id = 'your-folder-id'
-    list_assets_in_folder(folder_id)
+    project_id = "your-project-id"  # Replace with your project ID
+    assets = list_project_assets(project_id)
+    
+    for asset in assets:
+        print(f"Asset Name: {asset['name']}")
+        print(f"Asset Type: {asset['asset_type']}")
+        print(f"Created: {asset['created']}")
+        print(f"Status: {asset['status']}")
+        print("\n")
